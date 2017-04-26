@@ -21,59 +21,61 @@ app.config(function ($routeProvider, $locationProvider) {
         })
 });
 
+//Todos los servicios proporcionados al Objeto GroceryService
 app.service("GroceryService", function () {
     var groceryService = {};
     groceryService.groceryItems = [
         {
             id: 1,
-            completed: true,
+            completed: false,
             itemName: 'Milk',
             date: new Date("October 1, 2014 11:13:00")
         },
         {
             id: 2,
-            completed: true,
+            completed: false,
             itemName: 'Cookies',
             date: new Date("October 1, 2014 11:13:00")
         },
         {
             id: 3,
-            completed: true,
+            completed: false,
             itemName: 'Ice Cream',
             date: new Date("October 1, 2014 11:13:00")
         },
         {
             id: 4,
-            completed: true,
+            completed: false,
             itemName: 'Potatoes',
             date: new Date("October 2, 2014 11:13:00")
         },
         {
             id: 5,
-            completed: true,
+            completed: false,
             itemName: 'Cereal',
             date: new Date("October 3, 2014 11:13:00")
         },
         {
             id: 6,
-            completed: true,
+            completed: false,
             itemName: 'Bread',
             date: new Date("October 3, 2014 11:13:00")
         },
         {
             id: 7,
-            completed: true,
+            completed: false,
             itemName: 'Eggs',
             date: new Date("October 4, 2014 11:13:00")
         },
         {
             id: 8,
-            completed: true,
+            completed: false,
             itemName: 'Tortillas',
             date: new Date("October 5, 2014 11:13:00")
         }
 	];
 
+    //Función para buscar por ID
     groceryService.findById = function (id) {
     	for (var item in groceryService.groceryItems) {
     		if (groceryService.groceryItems[item].id === id) {
@@ -83,6 +85,7 @@ app.service("GroceryService", function () {
     	}
     };
 
+    //Función para asignar el próximo ID a un elemento nuevo
     groceryService.getNewId = function () {
         if (groceryService.newId) {
             groceryService.newId++;
@@ -96,6 +99,12 @@ app.service("GroceryService", function () {
         }
     }
 
+    //Función para cambiar el elemento Check de la lista 
+    groceryService.markCompleted = function(entry){
+        entry.completed = !entry.completed;
+    };
+
+    //Función para Eliminar un elemento de la lista.
     groceryService.removeItem = function(entry) {
         //indexOf Devuelve el index o lugar de un item en un array
         var index = groceryService.groceryItems.indexOf(entry);
@@ -103,6 +112,7 @@ app.service("GroceryService", function () {
         groceryService.groceryItems.splice(index, 1);
     }
 
+    //Función para guardar el elemento en el Array
     groceryService.save = function (entry) {
         var updatedItem = groceryService.findById(entry.id);
         if (updatedItem) {
@@ -113,18 +123,23 @@ app.service("GroceryService", function () {
         else
         {
             entry.id = groceryService.getNewId();
+            //push guarda el elemento en el Array
             groceryService.groceryItems.push(entry);
         } 
     };
     return groceryService;
 });
 
+//Controladores definidos en el Home del sitio
 app.controller("HomeController", ["$scope", "GroceryService", function ($scope, GroceryService) {
     $scope.appTitle = "Grocery List";
     $scope.groceryItems = GroceryService.groceryItems;
     $scope.removeItem = function(entry) {
         GroceryService.removeItem(entry);
-    }
+    };
+    $scope.markCompleted = function (entry){
+        GroceryService.markCompleted(entry);
+    };
 }]);
 
 app.controller("GroceryListItemController", ["$scope", "$routeParams", "$location", "GroceryService", function ($scope, $routeParams, $location, GroceryService) {
@@ -139,7 +154,7 @@ app.controller("GroceryListItemController", ["$scope", "$routeParams", "$locatio
 	   }
     else
     {
-        $scope.groceryItem = _.clone(GroceryService.findById(parseInt($routeParams.id)));;
+        $scope.groceryItem = _.clone(GroceryService.findById(parseInt($routeParams.id)));
         }
 
     
