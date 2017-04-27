@@ -1,5 +1,5 @@
+//Routing - Enrutamiento de la aplicación.
 var app = angular.module('groceryListApp', ["ngRoute"]);
-
 app.config(function ($routeProvider, $locationProvider) {
     $locationProvider.hashPrefix('');
     $routeProvider
@@ -22,58 +22,44 @@ app.config(function ($routeProvider, $locationProvider) {
 });
 
 //Todos los servicios proporcionados al Objeto GroceryService
-app.service("GroceryService", function () {
+app.service("GroceryService", function ($http) {
     var groceryService = {};
+    groceryService.groceryItems = [];
+
+    /* ARRAY DE PRUEBA
     groceryService.groceryItems = [
-        {
-            id: 1,
-            completed: false,
-            itemName: 'Milk',
-            date: new Date("October 1, 2014 11:13:00")
-        },
-        {
-            id: 2,
-            completed: false,
-            itemName: 'Cookies',
-            date: new Date("October 1, 2014 11:13:00")
-        },
-        {
-            id: 3,
-            completed: false,
-            itemName: 'Ice Cream',
-            date: new Date("October 1, 2014 11:13:00")
-        },
-        {
-            id: 4,
-            completed: false,
-            itemName: 'Potatoes',
-            date: new Date("October 2, 2014 11:13:00")
-        },
-        {
-            id: 5,
-            completed: false,
-            itemName: 'Cereal',
-            date: new Date("October 3, 2014 11:13:00")
-        },
-        {
-            id: 6,
-            completed: false,
-            itemName: 'Bread',
-            date: new Date("October 3, 2014 11:13:00")
-        },
-        {
-            id: 7,
-            completed: false,
-            itemName: 'Eggs',
-            date: new Date("October 4, 2014 11:13:00")
-        },
-        {
-            id: 8,
-            completed: false,
-            itemName: 'Tortillas',
-            date: new Date("October 5, 2014 11:13:00")
-        }
-	];
+    {id: 1, completed: false, itemName: "Milk", date: new Date ("October 1, 2014 11:13:00")},
+    {id: 2, completed: false, itemName: "Cookies", date: new Date ("October 1, 2014 11:13:00")},
+    {id: 3, completed: false, itemName: "Ice Cream", date: new Date ("October 1, 2014 11:13:00")},
+    {id: 4, completed: false, itemName: "Potatoes", date: new Date ("October 2, 2014 11:13:00")}
+    ];
+    console.log(groceryService.groceryItems); 
+    */
+
+    /* Para obtener datos de un servidor es necesario 
+    proporcionar la direcccion (URL) en la que se ubican los datos 
+    Ej. $http.get("http://www.welcome.com/file.htm")
+            .then(function(response) {
+            $scope.myWelcome = response.data;
+        });
+    */
+
+    $http.get("data/server-data.json")
+        .then(function (data){
+            //Debido a que data viene en forma de objeto, es necesario incluir el data.array en GroceryItems
+            groceryService.groceryItems = data.data;
+            //Convertir date en un objeto tipo Date
+            for (var item in groceryService.groceryItems){
+                groceryService.groceryItems[item].date = new Date (groceryService.groceryItems[item].date);
+            }
+            console.log(groceryService.groceryItems);
+            }, 
+            //En caso de no funcionar el then muestra el error
+            function(data){
+                alert ("Error!!");
+                console.log(data);
+            }
+        ); 
 
     //Función para buscar por ID
     groceryService.findById = function (id) {
@@ -133,13 +119,21 @@ app.service("GroceryService", function () {
 //Controladores definidos en el Home del sitio
 app.controller("HomeController", ["$scope", "GroceryService", function ($scope, GroceryService) {
     $scope.appTitle = "Grocery List";
+
     $scope.groceryItems = GroceryService.groceryItems;
+
     $scope.removeItem = function(entry) {
         GroceryService.removeItem(entry);
     };
+
     $scope.markCompleted = function (entry){
         GroceryService.markCompleted(entry);
     };
+
+    //watch inicializa el Array groceryItems al Scope al momento de cambiar la información.
+    $scope.$watch (function() { return GroceryService.groceryItems; }, function(groceryItems) {
+        $scope.groceryItems = groceryItems;
+    });
 }]);
 
 app.controller("GroceryListItemController", ["$scope", "$routeParams", "$location", "GroceryService", function ($scope, $routeParams, $location, GroceryService) {
@@ -154,9 +148,9 @@ app.controller("GroceryListItemController", ["$scope", "$routeParams", "$locatio
 	   }
     else
     {
+        //SnakeCase
         $scope.groceryItem = _.clone(GroceryService.findById(parseInt($routeParams.id)));
         }
-
     
     $scope.save = function () {
         GroceryService.save($scope.groceryItem);
