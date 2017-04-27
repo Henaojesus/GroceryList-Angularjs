@@ -108,7 +108,14 @@ app.service("GroceryService", function ($http) {
         }
         else
         {
-            entry.id = groceryService.getNewId();
+            $http.post("data/added-item.json", entry)
+                .then(function(data){
+                    entry.id = data.data.newId
+                },
+                function(data){
+
+                });
+            //entry.id = groceryService.getNewId();
             //push guarda el elemento en el Array
             groceryService.groceryItems.push(entry);
         } 
