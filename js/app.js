@@ -92,10 +92,22 @@ app.service("GroceryService", function ($http) {
 
     //Función para Eliminar un elemento de la lista.
     groceryService.removeItem = function(entry) {
-        //indexOf Devuelve el index o lugar de un item en un array
-        var index = groceryService.groceryItems.indexOf(entry);
-        //splice elimina la cantidad de elementos definidos en la posición intex
-        groceryService.groceryItems.splice(index, 1);
+
+        $http.post("data/delete-item.json", {id: entry.id})
+            .then(function(data){
+                    if (data.data.status == 1)
+                    {
+                        if (data.data.status){
+                            //indexOf Devuelve el index o lugar de un item en un array
+                            var index = groceryService.groceryItems.indexOf(entry);
+                            //splice elimina la cantidad de elementos definidos en la posición intex
+                            groceryService.groceryItems.splice(index, 1);
+                        }
+                    } 
+                },
+                function(data, status){
+
+                });   
     }
 
     //Función para guardar el elemento en el Array
